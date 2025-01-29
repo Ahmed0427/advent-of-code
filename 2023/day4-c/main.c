@@ -2,7 +2,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define MAX_LENGTH 256
+#define MAX_LENGTH 128 
+#define MAX_COUNT 256 
+
+int line_matches[MAX_COUNT] = {0};
+int line_copies[MAX_COUNT] = {1};
 
 void printStrList(char** list, int size) {
     for (int i = 0; i < size; i++) {
@@ -72,7 +76,7 @@ int stoi(char* str) {
     return res;
 }
 
-int calc_line_worth(char* line) {
+int calc_line_worth(char* line, int line_num) {
     char* dup_line = strdup(line);
     
     char* nums_str = dup_line + strcspn(dup_line, ":") + 2;
@@ -87,6 +91,7 @@ int calc_line_worth(char* line) {
     char** win_nums_list = split(groups_list[1], " ", &win_nums_size);
 
     int result = 0;
+    int matches = 0;
     for (int i = 0; i < my_nums_size; i++) {
         for (int j = 0; j < win_nums_size; j++) {
             int my_num = stoi(my_nums_list[i]);
@@ -94,8 +99,11 @@ int calc_line_worth(char* line) {
 
             if (my_num != win_num) continue; 
             result = !result ? 1 : result * 2;
+            matches++;
         }
     }
+
+    line_matches[line_num] = matches;
 
     freeStrList(win_nums_list, win_nums_size);
     freeStrList(my_nums_list, my_nums_size);
@@ -118,12 +126,25 @@ int main(int argc, char** argv) {
         exit(1);
     }
     
-    int ans = 0;
+    int line_num = 1;
     char line[MAX_LENGTH];
+    int ans1 = 0, ans2 = 0;
     while (fgets(line, sizeof(line), file_d)) {
         line[strcspn(line, "\n")] = '\0';
-        ans += calc_line_worth(line);
+        ans1 += calc_line_worth(line, line_num++);
     }
 
-    printf("part1: %d\n", ans);
+    for (int i = 1; i < line_num; i++) {
+        line_copies[i] += 1;
+        for (int j = 1; j <= line_matches[i]; j++) {
+            line_copies[i + j] += line_copies[i]; 
+        }
+        ans2 += line_copies[i];
+    }
+
+    printf("\n");
+    printf("part1: %d\n", ans1);
+    printf("part2: %d\n", ans2); 
+
+    return 0;
 }
