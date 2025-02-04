@@ -89,13 +89,20 @@ int main(int argc, char** argv) {
 
     
     while (fgets(line, sizeof(line), file_d)) {
-        if (line[0] == 's' && line[1] == 'e') get_section(seed_map, file_d);
-        if (line[0] == 's' && line[1] == 'o') get_section(soil_map, file_d);
-        if (line[0] == 'f') get_section(fert_map, file_d);
-        if (line[0] == 'w') get_section(water_map, file_d);
-        if (line[0] == 'l') get_section(light_map, file_d);
-        if (line[0] == 't') get_section(temp_map, file_d);
-        if (line[0] == 'h') get_section(humid_map, file_d);
+        switch (line[0]) {
+            case 's':
+                switch (line[1]) {
+                    case 'e': get_section(seed_map, file_d); break;
+                    case 'o': get_section(soil_map, file_d); break;
+                }
+                break;
+
+            case 'f': get_section(fert_map, file_d); break;
+            case 'w': get_section(water_map, file_d); break;
+            case 'l': get_section(light_map, file_d); break;
+            case 't': get_section(temp_map, file_d); break;
+            case 'h': get_section(humid_map, file_d); break;
+        }
     }
 
     int64_t ans1 = 2e9;
