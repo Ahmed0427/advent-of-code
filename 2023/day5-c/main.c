@@ -140,6 +140,7 @@ IntervalList update_intervals(IntervalList* input, Map map) {
                 dest_start + (overlap_start - src_start),
                 dest_start + (overlap_end - src_start)
             };
+
             if (result.size >= result.capacity) {
                 result.capacity = result.capacity ? result.capacity * 2 : 4;
                 result.list = realloc(result.list, result.capacity * sizeof(Interval));
