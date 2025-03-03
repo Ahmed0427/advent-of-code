@@ -10,6 +10,7 @@ import (
 )
 
 const cards = "AKQJT98765432"
+const jokerCards = "AKQT98765432J"
 
 type HandBid struct {
 	Hand string
@@ -17,6 +18,7 @@ type HandBid struct {
 }
 
 type ByHand []HandBid
+type ByJokerHand []HandBid
 
 func reverse(slice []int) {
 	n := len(slice)
@@ -64,6 +66,40 @@ func getHandType(s string) int {
 	return handType
 }
 
+func getBestType(runes []rune, idx int) int {
+	if idx == len(runes) {
+		return getHandType(string(runes))
+		fmt.Println(string(runes))
+	}	
+	best := 6
+	if runes[idx] == 'J' {
+		for _, card := range cards {
+			if card == 'J' {
+				continue
+			}
+			runes[idx] = card
+			res := getBestType(runes, idx + 1)		
+			runes[idx] = 'J'
+			if res < best {
+				best = res
+			}	
+		} 
+	} else {
+		res := getBestType(runes, idx + 1)		
+		if res < best {
+			best = res
+		}	
+	}
+
+	return best
+}
+
+func getHandTypeWithJokers(s string) int {
+	runes := []rune(s)
+	handType := getBestType(runes, 0)
+	return handType
+}
+
 func (h ByHand) Len() int {
 	return len(h)
 }
@@ -81,6 +117,30 @@ func (h ByHand) Less(i, j int) bool {
 			if h[i].Hand[x] != h[j].Hand[x] {
 				xi := strings.IndexRune(cards, rune(h[i].Hand[x]))
 				xj := strings.IndexRune(cards, rune(h[j].Hand[x]))
+				return xi > xj
+			}
+		}
+	}
+	return ti > tj
+}
+
+func (h ByJokerHand) Len() int {
+	return len(h)
+}
+
+func (h ByJokerHand) Swap(i, j int) {
+	h[i], h[j] = h[j], h[i]
+} 
+
+func (h ByJokerHand) Less(i, j int) bool {
+	ti := getHandTypeWithJokers(h[i].Hand)
+	tj := getHandTypeWithJokers(h[j].Hand)
+
+	if ti == tj {
+		for x := 0; x < 5; x++ {
+			if h[i].Hand[x] != h[j].Hand[x] {
+				xi := strings.IndexRune(jokerCards, rune(h[i].Hand[x]))
+				xj := strings.IndexRune(jokerCards, rune(h[j].Hand[x]))
 				return xi > xj
 			}
 		}
@@ -111,12 +171,18 @@ func main() {
 		}
 	}
 
+	ans1 := 0
 	sort.Sort(ByHand(handBidList))
-
-	ans := 0
 	for i, handBid := range(handBidList) {
-		ans += (i + 1) * handBid.Bid	
+		ans1 += (i + 1) * handBid.Bid	
 	}
+	fmt.Println(ans1)
 
-	fmt.Println(ans)
+
+	ans2 := 0
+	sort.Sort(ByJokerHand(handBidList))
+	for i, handBid := range(handBidList) {
+		ans2 += (i + 1) * handBid.Bid	
+	}
+	fmt.Println(ans2)
 }
